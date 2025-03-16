@@ -1,0 +1,61 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Food Sharing App',
+      theme: ThemeData(primarySwatch: Colors.green),
+      home: AuthScreen(),
+    );
+  }
+}
+
+class AuthScreen extends StatelessWidget {
+  void _signInAnonymously() {
+    // Simulating authentication
+    print("User signed in anonymously");
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Login')),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: _signInAnonymously,
+          child: Text('Sign in Anonymously'),
+        ),
+      ),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  final List<Map<String, dynamic>> foodListings = [
+    {'lat': 37.7749, 'lng': -122.4194, 'description': 'Pizza available!'},
+    {'lat': 37.7799, 'lng': -122.4144, 'description': 'Fresh vegetables!'},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Available Food')),
+      body: ListView.builder(
+        itemCount: foodListings.length,
+        itemBuilder: (context, index) {
+          final food = foodListings[index];
+          return ListTile(
+            title: Text(food['description']),
+            subtitle: Text('Location: (${food['lat']}, ${food['lng']})'),
+          );
+        },
+      ),
+    );
+  }
+}
