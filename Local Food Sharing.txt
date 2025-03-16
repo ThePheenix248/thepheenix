@@ -1,0 +1,93 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Food Sharing App',
+      theme: ThemeData(primarySwatch: Colors.green),
+      home: AuthScreen(),
+    );
+  }
+}
+
+class AuthScreen extends StatelessWidget {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> _signInAnonymously() async {
+    await _auth.signInAnonymously();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Login')),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: _signInAnonymously,
+          child: Text('Sign in Anonymously'),
+        ),
+      ),
+    );
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late GoogleMapController mapController;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Set<Marker> _markers = {};
+
+  void _onMapCreated(GoogleMapController controller) {
+    setState(() {
+      mapController = controller;
+      _loadFoodListings();
+    });
+  }
+
+  void _loadFoodListings() async {
+    QuerySnapshot snapshot = await _firestore.collection('food_listings').get();
+    setState(() {
+      _markers.clear();
+      for (var doc in snapshot.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        _markers.add(
+          Marker(
+            markerId: MarkerId(doc.id),
+            position: LatLng(data['lat'], data['lng']),
+            infoWindow: InfoWindow(title: data['description']),
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Available Food')),
+      body: GoogleMap(
+        onMapCreated: _onMapCreated,
+        initialCameraPosition: CameraPosition(
+          target: LatLng(37.7749, -122.4194),
+          zoom: 12,
+        ),
+        markers: _markers,
+      ),
+    );
+  }
+}
