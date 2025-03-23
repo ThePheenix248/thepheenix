@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:async';
 
 void main() {
   runApp(const MyApp());
@@ -17,11 +18,53 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const AuthScreen(),
+      home: const SplashScreen(), // Start with SplashScreen
     );
   }
 }
 
+// Splash Screen
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Timer(const Duration(seconds: 3), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const AuthScreen()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.lightGreenAccent.shade100,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Text(
+              'Food Sharing App',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green),
+            ),
+            SizedBox(height: 20),
+            CircularProgressIndicator(color: Colors.green),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Authentication Screen
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});
 
@@ -53,6 +96,7 @@ class AuthScreen extends StatelessWidget {
   }
 }
 
+// Home Screen
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -69,6 +113,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+// Food Listing Screen
 class FoodListScreen extends StatelessWidget {
   const FoodListScreen({super.key});
 
@@ -114,16 +159,18 @@ class FoodListScreen extends StatelessWidget {
   }
 }
 
+// Food Detail Screen
 class FoodDetailScreen extends StatelessWidget {
   final Map<String, dynamic> food;
   const FoodDetailScreen({super.key, required this.food});
 
-  void _openMap() async {
-    String googleUrl = 'https://www.google.com/maps/search/?api=1&query=${food['lat']},${food['lng']}';
-    if (await canLaunchUrl(Uri.parse(googleUrl))) {
-      await launchUrl(Uri.parse(googleUrl));
+  Future<void> _openMap() async {
+    final String googleUrl = 'https://www.google.com/maps/search/?api=1&query=${food['lat']},${food['lng']}';
+
+    if (await canLaunch(googleUrl)) {
+      await launch(googleUrl);
     } else {
-      throw 'Could not open the map.';
+      debugPrint('Could not launch Google Maps URL');
     }
   }
 
